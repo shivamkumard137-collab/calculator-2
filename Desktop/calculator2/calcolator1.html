@@ -1,0 +1,162 @@
+
+<!doctype html>
+<html>
+<head>
+  <title>Online Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: #f5f7fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      margin: 0;
+    }
+    .calculator {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      padding: 20px;
+      width: 320px;
+    }
+    .display {
+      background: #eaf1ff;
+      border-radius: 10px;
+      padding: 20px;
+      font-size: 28px;
+      text-align: right;
+      overflow-x: auto;
+      color: #222;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+    button {
+      padding: 16px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background: #f0f2f5;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    button:hover { background: #e0e7ff; }
+    .op { background: #1976d2; color: #fff; }
+    .equals { background: #2e7d32; color: #fff; grid-column: span 2; }
+    .clear { background: #d32f2f; color: #fff; }
+    .zero { grid-column: span 2; }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div id="display" class="display">0</div>
+    <div class="buttons">
+      <button class="clear" onclick="allClear()">AC</button>
+      <button onclick="clearLast()">C</button>
+      <button onclick="operate('%')">%</button>
+      <button class="op" onclick="operate('/')">÷</button>
+
+      <button onclick="addNumber('7')">7</button>
+      <button onclick="addNumber('8')">8</button>
+      <button onclick="addNumber('9')">9</button>
+      <button class="op" onclick="operate('*')">×</button>
+
+      <button onclick="addNumber('4')">4</button>
+      <button onclick="addNumber('5')">5</button>
+      <button onclick="addNumber('6')">6</button>
+      <button class="op" onclick="operate('-')">−</button>
+
+      <button onclick="addNumber('1')">1</button>
+      <button onclick="addNumber('2')">2</button>
+      <button onclick="addNumber('3')">3</button>
+      <button class="op" onclick="operate('+')">+</button>
+
+      <button class="zero" onclick="addNumber('0')">0</button>
+      <button onclick="addNumber('.')">.</button>
+      <button class="equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+<script>
+  // ----- User-defined functions -----
+
+  let displayEl = document.getElementById('display');
+  let currentInput = '';
+  let lastOperator = '';
+  let resetNext = false;
+
+  // Add digit or decimal
+  function addNumber(num) {
+    if (resetNext) { currentInput = ''; resetNext = false; }
+    currentInput += num;
+    updateDisplay(currentInput);
+  }
+
+  // Handle operations (+, -, *, /, %)
+  function operate(op) {
+    if (currentInput === '' && op !== '-') return;
+    try {
+      if (op === '%') {
+        currentInput = String(parseFloat(currentInput) / 100);
+        updateDisplay(currentInput);
+        return;
+      }
+      currentInput += ' ' + op + ' ';
+      updateDisplay(currentInput);
+    } catch {
+      updateDisplay('Error');
+      currentInput = '';
+    }
+  }
+
+  // Calculate the result
+  function calculate() {
+    try {
+      const result = eval(currentInput.replace(/÷/g, '/').replace(/×/g, '*'));
+      updateDisplay(result);
+      currentInput = String(result);
+      resetNext = true;
+    } catch {
+      updateDisplay('Error');
+      currentInput = '';
+    }
+  }
+
+  // Clear all
+  function allClear() {
+    currentInput = '';
+    updateDisplay('0');
+  }
+
+  // Clear last character
+  function clearLast() {
+    currentInput = currentInput.trim();
+    if (currentInput.length > 0)
+      currentInput = currentInput.slice(0, -1);
+    updateDisplay(currentInput || '0');
+  }
+
+  // Update display
+  function updateDisplay(value) {
+    displayEl.textContent = value;
+  }
+
+  // Keyboard support
+  document.addEventListener('keydown', function(e){
+    const key = e.key;
+    if (!isNaN(key) || key === '.') addNumber(key);
+    else if (['+', '-', '*', '/', '%'].includes(key)) operate(key);
+    else if (key === 'Enter' || key === '=') calculate();
+    else if (key === 'Backspace') clearLast();
+    else if (key === 'Escape') allClear();
+  });
+</script>
+</body>
+</html>
